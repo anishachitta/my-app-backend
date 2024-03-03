@@ -74,6 +74,7 @@ app.get("/cities", (req, res) => {
 });
 
 //POST
+//updates the supplies given quantity, type of supplies, and city, returns row of relevant city
 app.post("/update-supplies", (req, res) => {
   const { typeOfAid, quantity, cityLocation } = req.body;
 
@@ -85,11 +86,15 @@ app.post("/update-supplies", (req, res) => {
         console.error(err.message);
         res.status(500).send(err.message);
       } else {
-        res
-          .status(200)
-          .json({
-            message: `Updated supplies for ${typeOfAid} in ${cityLocation} by ${quantity}`,
-          });
+        let selectSql = `SELECT * FROM City WHERE CityName = ? AND SupplyType = ?`;
+        db.get(selectSql, [cityLocation, typeOfAid], (err, row) => {
+          if (err) {
+            console.error(err.message);
+            res.status(500).send(err.message);
+          } else {
+            res.status(200).json(row);
+          }
+        });
       }
     });
   });
